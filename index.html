@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>2027.10.01 提车计划</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; }
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at top, #1e293b 0%, #090d16 100%);
+      color: #f8fafc;
+      padding: 18px;
+    }
+    .card {
+      width: 100%;
+      max-width: 480px;
+      background: rgba(20, 28, 45, 0.94);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      border-radius: 22px;
+      padding: 24px 20px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+    }
+    .badge {
+      display: inline-block;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      margin-bottom: 10px;
+    }
+    h1 { font-size: 21px; margin-bottom: 4px; }
+    .sub { font-size: 13px; color: #94a3b8; margin-bottom: 18px; }
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      background: #0b1120;
+      padding: 5px;
+      border-radius: 12px;
+      margin-bottom: 18px;
+    }
+    .tab {
+      border: none;
+      background: transparent;
+      color: #94a3b8;
+      padding: 8px 0;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .tab.active {
+      background: #38bdf8;
+      color: #090d16;
+      font-weight: 700;
+    }
+    .timer-box {
+      text-align: center;
+      background: rgba(11, 17, 32, 0.85);
+      border: 1px solid rgba(148, 163, 184, 0.12);
+      border-radius: 16px;
+      padding: 20px 14px;
+      margin-bottom: 18px;
+    }
+    .big-num {
+      font-size: 36px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.5px;
+    }
+    .unit { font-size: 13px; color: #38bdf8; margin-top: 6px; }
+    .sub-time { font-size: 12px; color: #94a3b8; margin-top: 8px; font-variant-numeric: tabular-nums; }
+    .section {
+      background: rgba(15, 23, 42, 0.72);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+    .row-top {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #cbd5e1;
+      margin-bottom: 8px;
+    }
+    .bar-bg {
+      width: 100%;
+      height: 9px;
+      background: #090d16;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .bar-time {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #38bdf8, #818cf8);
+      border-radius: 999px;
+      transition: width 0.4s ease;
+    }
+    .bar-money {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #34d399, #10b981);
+      border-radius: 999px;
+      transition: width 0.4s ease;
+    }
+    .inputs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .field label {
+      display: block;
+      font-size: 11px;
+      color: #94a3b8;
+      margin-bottom: 4px;
+    }
+    .field input {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      background: #090d16;
+      color: #f8fafc;
+      font-size: 14px;
+      font-variant-numeric: tabular-nums;
+    }
+    .money-summary {
+      margin-top: 12px;
+      font-size: 13px;
+      color: #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .quote {
+      font-size: 12px;
+      color: #94a3b8;
+      line-height: 1.6;
+      text-align: center;
+      padding-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="badge">2027.10.01 · 提前蓄力</div>
+    <h1>买车倒计时与攒钱看板</h1>
+    <p class="sub">把时间算清楚，把预算攒扎实，到时候从容提车</p>
+
+    <div class="tabs">
+      <button class="tab active" data-mode="hours">按小时</button>
+      <button class="tab" data-mode="minutes">按分钟</button>
+      <button class="tab" data-mode="seconds">按秒</button>
+    </div>
+
+    <div class="timer-box">
+      <div class="big-num" id="mainNum">--</div>
+      <div class="unit" id="unitText">剩余小时</div>
+      <div class="sub-time" id="subTime">正在计算...</div>
+    </div>
+
+    <div class="section">
+      <div class="row-top">
+        <span>时间进度（2026-11-21 至 2027-10-01）</span>
+        <span id="timePct">0%</span>
+      </div>
+      <div class="bar-bg">
+        <div class="bar-time" id="timeBar"></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="row-top">
+        <span>攒钱进度（自动保存在本机）</span>
+        <span id="moneyPct">0%</span>
+      </div>
+      <div class="bar-bg">
+        <div class="bar-money" id="moneyBar"></div>
+      </div>
+
+      <div class="inputs">
+        <div class="field">
+          <label for="targetMoney">目标购车预算（元）</label>
+          <input id="targetMoney" type="number" min="0" step="1000" placeholder="例如 100000" />
+        </div>
+        <div class="field">
+          <label for="savedMoney">当前已攒金额（元）</label>
+          <input id="savedMoney" type="number" min="0" step="500" placeholder="例如 20000" />
+        </div>
+      </div>
+
+      <div class="money-summary">
+        <span id="remainMoney">还差：-- 元</span>
+        <span id="monthlyNeed">月均需攒：-- 元</span>
+      </div>
+    </div>
+
+    <div class="quote" id="quoteText">稳扎稳打推进，每一步都在靠近目标。</div>
+  </div>
+
+  <script>
+    const startTs = new Date("2026-11-21T00:00:00+08:00").getTime();
+    const targetTs = new Date("2027-10-01T00:00:00+08:00").getTime();
+    let mode = "hours";
+
+    const targetInput = document.getElementById("targetMoney");
+    const savedInput = document.getElementById("savedMoney");
+
+    targetInput.value = localStorage.getItem("car_target_money") || "100000";
+    savedInput.value = localStorage.getItem("car_saved_money") || "0";
+
+    function saveAndRefresh() {
+      localStorage.setItem("car_target_money", targetInput.value);
+      localStorage.setItem("car_saved_money", savedInput.value);
+      updateMoney(Date.now());
+    }
+
+    targetInput.addEventListener("input", saveAndRefresh);
+    savedInput.addEventListener("input", saveAndRefresh);
+
+    document.querySelectorAll(".tab").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".tab").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        mode = btn.dataset.mode;
+        updateTime();
+      });
+    });
+
+    function fmt(num) {
+      return Math.max(0, Math.floor(num)).toLocaleString("zh-CN");
+    }
+
+    function updateMoney(now) {
+      const target = Math.max(0, Number(targetInput.value) || 0);
+      const saved = Math.max(0, Number(savedInput.value) || 0);
+      const remain = Math.max(0, target - saved);
+      const pct = target > 0 ? Math.min(100, (saved / target) * 100) : 0;
+
+      document.getElementById("moneyPct").textContent = `${pct.toFixed(1)}%`;
+      document.getElementById("moneyBar").style.width = `${pct}%`;
+      document.getElementById("remainMoney").textContent = `还差：${remain.toLocaleString("zh-CN")} 元`;
+
+      const msPerMonth = 1000 * 60 * 60 * 24 * 30.4375;
+      const monthsLeft = Math.max(1, (targetTs - now) / msPerMonth);
+      const perMonth = remain / monthsLeft;
+      document.getElementById("monthlyNeed").textContent = `月均需攒：${Math.ceil(perMonth).toLocaleString("zh-CN")} 元`;
+    }
+
+    function updateTime() {
+      const now = Date.now();
+      const diffMs = Math.max(0, targetTs - now);
+      const totalSec = diffMs / 1000;
+      const totalMin = totalSec / 60;
+      const totalHr = totalMin / 60;
+      const totalDays = totalHr / 24;
+
+      const mainEl = document.getElementById("mainNum");
+      const unitEl = document.getElementById("unitText");
+      const subEl = document.getElementById("subTime");
+      const quoteEl = document.getElementById("quoteText");
+
+      const remDays = Math.floor(totalDays);
+      const remHrs = Math.floor(totalHr % 24);
+      const remMins = Math.floor(totalMin % 60);
+      const remSecs = Math.floor(totalSec % 60);
+
+      if (diffMs === 0) {
+        mainEl.textContent = "0";
+        unitEl.textContent = "目标日已到";
+        subEl.textContent = "2027 年 10 月 1 日已到，准备提车！";
+      } else if (mode === "hours") {
+        mainEl.textContent = fmt(totalHr);
+        unitEl.textContent = "剩余小时";
+        subEl.textContent = `还剩 ${remDays} 天 ${remHrs} 小时 ${remMins} 分 ${remSecs} 秒`;
+      } else if (mode === "minutes") {
+        mainEl.textContent = fmt(totalMin);
+        unitEl.textContent = "剩余分钟";
+        subEl.textContent = `约 ${fmt(totalHr)} 小时 · 还剩 ${remDays} 天`;
+      } else {
+        mainEl.textContent = fmt(totalSec);
+        unitEl.textContent = "剩余秒";
+        subEl.textContent = `约 ${fmt(totalMin)} 分钟 · 还剩 ${remDays} 天`;
+      }
+
+      const span = Math.max(1, targetTs - startTs);
+      const elapsed = Math.min(span, Math.max(0, now - startTs));
+      const timePct = (elapsed / span) * 100;
+      document.getElementById("timePct").textContent = `${timePct.toFixed(1)}%`;
+      document.getElementById("timeBar").style.width = `${timePct}%`;
+
+      if (totalDays > 250) {
+        quoteEl.textContent = "当前处于蓄力期：先把每月攒钱节奏跑顺，不急着定死具体车型。";
+      } else if (totalDays > 90) {
+        quoteEl.textContent = "进入中期推进：对照预算筛选备选车型，算清保险、税费和养车成本。";
+      } else if (totalDays > 30) {
+        quoteEl.textContent = "进入准备冲刺：锁定目标配置与底价方案，资金逐步归集到位。";
+      } else {
+        quoteEl.textContent = "最后冲刺阶段：核对合同、保险与提车清单，迎接 10 月 1 日！";
+      }
+
+      updateMoney(now);
+    }
+
+    updateTime();
+    setInterval(updateTime, 1000);
+  </script>
+</body>
+</html>
